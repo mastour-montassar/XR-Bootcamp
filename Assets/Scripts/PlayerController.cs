@@ -13,18 +13,23 @@ public class PlayerController : MonoBehaviour
     public float MinYLookAngle = -90f;
     public float MaxYLookAngle = 90f;
     public Transform PlayerCamera;
+    public Transform toolHolder; 
+    public float PickupRange = 5f; 
     public float Gravity = -9.8f;
 
     private Vector3 velocity;
     private float verticalRotation = 0f;
     private CharacterController characterController;
+    private GameObject currentTool; 
 
-    // New Input System fields
+ 
     private PlayerInput playerInput;
     private InputAction moveAction;
     private InputAction jumpAction;
     private InputAction sprintAction;
     private InputAction lookAction;
+    private InputAction pickupAction;
+    private InputAction dropAction;
 
     void Awake()
     {
@@ -36,14 +41,15 @@ public class PlayerController : MonoBehaviour
         jumpAction = playerInput.actions["Jump"];
         sprintAction = playerInput.actions["Sprint"];
         lookAction = playerInput.actions["Look"];
+        pickupAction = playerInput.actions["Pickup"]; 
+        dropAction = playerInput.actions["Drop"]; 
 
         Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
     {
-        
-        // Get movement inputs
+        // Movement
         Vector2 movementInput = moveAction.ReadValue<Vector2>();
         float horizontalMovement = movementInput.x;
         float verticalMovement = movementInput.y;
@@ -56,9 +62,8 @@ public class PlayerController : MonoBehaviour
         {
             speed *= SprintMultiplier;
         }
-
         characterController.Move(moveDirection * speed * Time.deltaTime);
-        
+
         // Handle jumping
         if (jumpAction.triggered && IsGrounded())
         {
@@ -71,7 +76,7 @@ public class PlayerController : MonoBehaviour
 
         characterController.Move(velocity * Time.deltaTime);
 
-        // Get look inputs (mouse)
+        // Handle camera look
         if (PlayerCamera != null)
         {
             Vector2 lookInput = lookAction.ReadValue<Vector2>();
@@ -84,6 +89,25 @@ public class PlayerController : MonoBehaviour
             PlayerCamera.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
             transform.Rotate(Vector3.up * mouseX);
         }
+
+        // Handle object pickup
+        if (pickupAction.triggered)
+        {
+            TryPickupObject();
+        }
+
+        // Handle object drop
+        if (dropAction.triggered)
+        {
+            DropTool();
+        }
+
+        // Position the held tool in front of the player
+        if (currentTool != null)
+        {
+            currentTool.transform.position = toolHolder.position;
+            currentTool.transform.rotation = toolHolder.rotation;
+        }
     }
 
     bool IsGrounded()
@@ -94,5 +118,39 @@ public class PlayerController : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    // Try to pick up an object using a raycast
+    void TryPickupObject()
+    {
+        Ray ray = new Ray(PlayerCamera.position, PlayerCamera.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, PickupRange))
+        {
+            if (hit.transform.CompareTag("Pickup")) 
+            {
+                EquipTool(hit.transform.gameObject);
+            }
+        }
+    }
+
+    // Equip the tool by attaching it to the tool holder
+    void EquipTool(GameObject tool)
+    {
+        currentTool = tool;
+        tool.GetComponent<Rigidbody>().isKinematic = true; // Disable physics while holding
+        tool.transform.SetParent(toolHolder);
+    }
+
+    // Drop the tool and re-enable physics
+    void DropTool()
+    {
+        if (currentTool != null)
+        {
+            currentTool.transform.SetParent(null); // Detach from the player
+            currentTool.GetComponent<Rigidbody>().isKinematic = false; // Re-enable physics
+            currentTool = null; // Clear the reference
+        }
     }
 }
