@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI; // Include for UI handling
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -14,6 +15,8 @@ public class PlayerController : MonoBehaviour
     public float MaxYLookAngle = 90f;
     public Transform PlayerCamera;
     public float Gravity = -9.8f;
+    public Vector3 StartingPosition; // Store the starting position
+    public Text WinText; // UI Text for winning message
 
     private Vector3 velocity;
     private float verticalRotation = 0f;
@@ -37,12 +40,14 @@ public class PlayerController : MonoBehaviour
         sprintAction = playerInput.actions["Sprint"];
         lookAction = playerInput.actions["Look"];
 
+        StartingPosition = transform.position; // Store the starting position
+
         Cursor.lockState = CursorLockMode.Locked;
+        WinText.gameObject.SetActive(false); // Hide win text initially
     }
 
     void Update()
     {
-        
         // Get movement inputs
         Vector2 movementInput = moveAction.ReadValue<Vector2>();
         float horizontalMovement = movementInput.x;
@@ -58,7 +63,7 @@ public class PlayerController : MonoBehaviour
         }
 
         characterController.Move(moveDirection * speed * Time.deltaTime);
-        
+
         // Handle jumping
         if (jumpAction.triggered && IsGrounded())
         {
@@ -84,6 +89,12 @@ public class PlayerController : MonoBehaviour
             PlayerCamera.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
             transform.Rotate(Vector3.up * mouseX);
         }
+
+       
+        if (transform.position.y < -5) 
+        {
+            ResetPlayer();
+        }
     }
 
     bool IsGrounded()
@@ -94,5 +105,20 @@ public class PlayerController : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    private void ResetPlayer()
+    {
+        transform.position = StartingPosition; // Reset to starting position
+        velocity = Vector3.zero; // Reset velocity
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // Check if the player reaches the winning area
+        if (other.CompareTag("Goal"))
+        {
+            WinText.gameObject.SetActive(true); // Show the win text
+        }
     }
 }
