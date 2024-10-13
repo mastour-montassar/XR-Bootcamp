@@ -9,7 +9,7 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float threshold = 0.5f;
     [SerializeField] private Transform point1;
     [SerializeField] private Transform point2;
-
+    [SerializeField] private Transform point3;
     private bool moving = false;
     private Transform currentPoint;
     
@@ -26,6 +26,10 @@ public class EnemyController : MonoBehaviour
             if (currentPoint == point1)
             {
                 currentPoint = point2;
+            }
+            else if (currentPoint == point2)
+            {
+                currentPoint = point3;
             }
             else
             {
