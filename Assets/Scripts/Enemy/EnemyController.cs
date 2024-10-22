@@ -8,37 +8,48 @@ public class EnemyController : MonoBehaviour
     enum EnemyState
     {
         Patrol = 0,
-        Investigate = 1
+        Investigate = 1,
+        ReportBack = 2,          
+        InvestigatingTogether = 3 
     }
-    
+
     [SerializeField] private NavMeshAgent _agent;
     [SerializeField] private float _threshold = 0.5f;
     [SerializeField] private float _waitTime = 2f;
     [SerializeField] private PatrolRoute _patrolRoute;
     [SerializeField] private FieldOfView _fov;
     [SerializeField] private EnemyState _state = EnemyState.Patrol;
-
+    [SerializeField] private GameObject otherRobot;
     private bool _moving = false;
     private Transform _currentPoint;
     private int _routeIndex = 0;
     private bool _forwardsAlongPath = true;
-    private Vector3 _investigationPoint;
-    private float _waitTimer = 0f;
-    
-    // Start is called before the first frame update
+    private Vector3 _investigationPoint; 
+    private Vector3 _otherRobotPosition;
+    private bool _hasReported = false; 
+    private float _waitTimer = 0f; 
+
     void Start()
     {
         _currentPoint = _patrolRoute.route[_routeIndex];
+        _otherRobotPosition = otherRobot.transform.position;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (_fov.visibleObjects.Count > 0)
         {
-            InvestigatePoint(_fov.visibleObjects[0].position);
+            Vector3 playerPosition = _fov.visibleObjects[0].position;
+
+            if (!_hasReported)
+            {
+                _investigationPoint = playerPosition;
+                _state = EnemyState.ReportBack;  
+                _agent.SetDestination(otherRobot.transform.position); 
+            }
         }
-        
+
+
         if (_state == EnemyState.Patrol)
         {
             UpdatePatrol();
@@ -47,11 +58,47 @@ public class EnemyController : MonoBehaviour
         {
             UpdateInvestigate();
         }
+        else if (_state == EnemyState.ReportBack)
+        {
+            UpdateReportBack();
+        }
+        else if (_state == EnemyState.InvestigatingTogether)
+        {
+            UpdateInvestigateTogether();
+        }
+    }
+
+    private void UpdateReportBack()
+    {
+        if (Vector3.Distance(transform.position, otherRobot.transform.position) < _threshold)
+        {
+            _hasReported = true;
+            otherRobot.GetComponent<EnemyController>().InvestigateTogether(_investigationPoint);
+            InvestigateTogether(_investigationPoint); 
+        }
+    }
+
+    public void InvestigateTogether(Vector3 investigatePoint)
+    {
+        _state = EnemyState.InvestigatingTogether;
+        _investigationPoint = investigatePoint;
+        _agent.SetDestination(_investigationPoint);
+    }
+
+    private void UpdateInvestigateTogether()
+    {
+        if (Vector3.Distance(transform.position, _investigationPoint) < _threshold)
+        {
+            _waitTimer += Time.deltaTime;
+            if (_waitTimer > _waitTime)
+            {
+                ReturnToPatrol();
+            }
+        }
     }
 
     public void InvestigatePoint(Vector3 investigatePoint)
     {
-        //Debug.Log("Investigate Point Triggered");
         _state = EnemyState.Investigate;
         _investigationPoint = investigatePoint;
         _agent.SetDestination(_investigationPoint);
@@ -59,7 +106,6 @@ public class EnemyController : MonoBehaviour
 
     private void UpdateInvestigate()
     {
-        //Debug.Log("Investigating");
         if (Vector3.Distance(transform.position, _investigationPoint) < _threshold)
         {
             _waitTimer += Time.deltaTime;
@@ -72,10 +118,10 @@ public class EnemyController : MonoBehaviour
 
     private void ReturnToPatrol()
     {
-        Debug.Log("Enemy returning to patrol");
         _state = EnemyState.Patrol;
         _waitTimer = 0;
         _moving = false;
+        _hasReported = false; // Reset reporting status
     }
 
     private void UpdatePatrol()
@@ -83,7 +129,6 @@ public class EnemyController : MonoBehaviour
         if (!_moving)
         {
             NextPatrolPoint();
-
             _agent.SetDestination(_currentPoint.position);
             _moving = true;
         }
@@ -104,7 +149,7 @@ public class EnemyController : MonoBehaviour
         {
             _routeIndex--;
         }
-            
+
         if (_routeIndex == _patrolRoute.route.Count)
         {
             if (_patrolRoute.patrolType == PatrolRoute.PatrolType.Loop)
@@ -122,9 +167,7 @@ public class EnemyController : MonoBehaviour
         {
             _forwardsAlongPath = true;
         }
-        
-        //Debug.Log(_routeIndex);
-            
+
         _currentPoint = _patrolRoute.route[_routeIndex];
     }
 }
