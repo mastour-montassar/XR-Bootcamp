@@ -60,6 +60,22 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "Press(behavior=2)"
+                },
+                {
+                    "name": "Hide",
+                    "type": "Button",
+                    "id": "829241ed-1768-4343-8cdd-8cbd1d437e0b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press"
+                },
+                {
+                    "name": "UnHide",
+                    "type": "Button",
+                    "id": "fcb013eb-a762-4048-bda8-664c2c53ce20",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Press"
                 }
             ],
             "bindings": [
@@ -269,6 +285,28 @@
                     "processors": "",
                     "groups": "KeyboardMouse",
                     "action": "Throw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "77c6177b-9cb0-454c-9760-b40f5034496f",
+                    "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "Hide",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cc717762-552a-4961-9981-eaa1b972270c",
+                    "path": "<Keyboard>/leftShift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "KeyboardMouse",
+                    "action": "UnHide",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

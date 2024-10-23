@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class FieldOfView : MonoBehaviour
 {
+    public BoxHiding playerHidingScript;
     public List<Transform> visibleObjects;
     
     [SerializeField] private Color _gizmoColor = Color.red;
@@ -17,6 +18,7 @@ public class FieldOfView : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        playerHidingScript = GameObject.FindWithTag("Player").GetComponent<BoxHiding>();
         
     }
 
@@ -28,7 +30,9 @@ public class FieldOfView : MonoBehaviour
         Collider[] targetsInViewRadius = Physics.OverlapSphere(transform.position, _viewRadius);
         foreach (Collider target in targetsInViewRadius)
         {
-            if (!target.TryGetComponent(out Creature targetCreature)) continue;
+            
+            
+            if (!target.TryGetComponent(out Creature targetCreature))  continue;
 
             if (_creature.team == targetCreature.team) continue;
 
@@ -48,6 +52,11 @@ public class FieldOfView : MonoBehaviour
                 }
                 
                 Debug.DrawLine(headPos,targetHeadPos, Color.green);
+                if (playerHidingScript.IsPlayerHiding())
+                {
+                    Debug.Log("Robot can't see the player. Player is hiding in the box.");
+                    continue;
+                }
                 
                 visibleObjects.Add(target.transform);
             }
