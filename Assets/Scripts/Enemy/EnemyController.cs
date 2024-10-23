@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Events;
 
 public class EnemyController : MonoBehaviour
 {
@@ -12,11 +13,16 @@ public class EnemyController : MonoBehaviour
     }
     
     [SerializeField] private NavMeshAgent _agent;
+    [SerializeField] private Animator _animator;
     [SerializeField] private float _threshold = 0.5f;
     [SerializeField] private float _waitTime = 2f;
     [SerializeField] private PatrolRoute _patrolRoute;
     [SerializeField] private FieldOfView _fov;
     [SerializeField] private EnemyState _state = EnemyState.Patrol;
+
+    public UnityEvent<Transform> onPlayerFound;
+    public UnityEvent onInvestigate;
+    public UnityEvent onReturnToPatrol;
 
     private bool _moving = false;
     private Transform _currentPoint;
@@ -24,6 +30,7 @@ public class EnemyController : MonoBehaviour
     private bool _forwardsAlongPath = true;
     private Vector3 _investigationPoint;
     private float _waitTimer = 0f;
+    private bool _playerFound = false;
     
     // Start is called before the first frame update
     void Start()
@@ -34,9 +41,11 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        _animator.SetFloat("Speed", _agent.velocity.magnitude);
+        
         if (_fov.visibleObjects.Count > 0)
         {
-            InvestigatePoint(_fov.visibleObjects[0].position);
+            PlayerFound(_fov.visibleObjects[0].position);
         }
         
         if (_state == EnemyState.Patrol)
@@ -52,9 +61,27 @@ public class EnemyController : MonoBehaviour
     public void InvestigatePoint(Vector3 investigatePoint)
     {
         //Debug.Log("Investigate Point Triggered");
+        SetInvestigationPoint(investigatePoint);
+
+        onInvestigate.Invoke();
+    }
+
+    private void SetInvestigationPoint(Vector3 investigatePoint)
+    {
         _state = EnemyState.Investigate;
         _investigationPoint = investigatePoint;
         _agent.SetDestination(_investigationPoint);
+    }
+
+    private void PlayerFound(Vector3 investigatePoint)
+    {
+        if (_playerFound) return;
+        
+        SetInvestigationPoint(investigatePoint);
+        
+        onPlayerFound.Invoke(_fov.creature.head);
+
+        _playerFound = true;
     }
 
     private void UpdateInvestigate()
@@ -76,6 +103,8 @@ public class EnemyController : MonoBehaviour
         _state = EnemyState.Patrol;
         _waitTimer = 0;
         _moving = false;
+        
+        onReturnToPatrol.Invoke();
     }
 
     private void UpdatePatrol()
