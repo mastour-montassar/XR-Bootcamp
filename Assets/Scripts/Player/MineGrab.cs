@@ -4,14 +4,24 @@ public class MineGrab : MonoBehaviour
 {
     [SerializeField] private Transform _cameraPosition;   
     [SerializeField] private Transform _holdPosition;     
-    [SerializeField] private float _grabRange = 2f;       
+    [SerializeField] private float _grabRange = 6f;       
     [SerializeField] private float _throwForce = 20f;    
-    [SerializeField] private float _snapSpeed = 40f;     
-    [SerializeField] private LayerMask _surfaceLayer;    
+    [SerializeField] private float _snapSpeed = 40f; 
+    [SerializeField] private Rigidbody _rigidbody;
+    [SerializeField] private LayerMask _surfaceLayer;
+   
 
     private Rigidbody _grabbedObject;                 
     private bool _grabPressed = false;                   
-    private bool _isThrown = false;                    
+    private bool _isThrown = false;  
+
+
+
+    void Start()
+    {
+        _rigidbody.isKinematic = true; 
+        _rigidbody.useGravity = false;
+    }
 
     void FixedUpdate()
     {
