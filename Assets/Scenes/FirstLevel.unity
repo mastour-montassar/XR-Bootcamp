@@ -1293,7 +1293,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh45270
+  m_Name: pb_Mesh51672
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -54600,7 +54600,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh45382
+  m_Name: pb_Mesh51804
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -54915,6 +54915,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 513975295356526878, guid: 46b0968e285d15d4fa64c388b8cff600, type: 3}
+      propertyPath: m_TagString
+      value: Robot
+      objectReference: {fileID: 0}
     - target: {fileID: 7858300990111908775, guid: 46b0968e285d15d4fa64c388b8cff600, type: 3}
       propertyPath: m_Name
       value: Robot 2
@@ -54945,7 +54949,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7858300990111908794, guid: 46b0968e285d15d4fa64c388b8cff600, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -6.03
+      value: -13.53
       objectReference: {fileID: 0}
     - target: {fileID: 7858300990111908794, guid: 46b0968e285d15d4fa64c388b8cff600, type: 3}
       propertyPath: m_LocalRotation.w
@@ -54981,11 +54985,11 @@ PrefabInstance:
       objectReference: {fileID: 229221314}
     - target: {fileID: 7858300990111908797, guid: 46b0968e285d15d4fa64c388b8cff600, type: 3}
       propertyPath: _state
-      value: 1
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7858300990111908797, guid: 46b0968e285d15d4fa64c388b8cff600, type: 3}
       propertyPath: _threshold
-      value: 1
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 7858300990111908797, guid: 46b0968e285d15d4fa64c388b8cff600, type: 3}
       propertyPath: otherRobot
@@ -55003,7 +55007,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh45232
+  m_Name: pb_Mesh51634
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -55267,7 +55271,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh45308
+  m_Name: pb_Mesh51710
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -57311,7 +57315,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh45218
+  m_Name: pb_Mesh51612
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -57475,7 +57479,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh45352
+  m_Name: pb_Mesh51774
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -58331,7 +58335,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh45288
+  m_Name: pb_Mesh51690
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -58615,7 +58619,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4236733521188710655, guid: e08d5a579e0c57e4d82d194ec52d8c0f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18.16
+      value: 18.94
       objectReference: {fileID: 0}
     - target: {fileID: 4236733521188710655, guid: e08d5a579e0c57e4d82d194ec52d8c0f, type: 3}
       propertyPath: m_LocalPosition.y
@@ -58623,7 +58627,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4236733521188710655, guid: e08d5a579e0c57e4d82d194ec52d8c0f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -2.58
+      value: 0.34
       objectReference: {fileID: 0}
     - target: {fileID: 4236733521188710655, guid: e08d5a579e0c57e4d82d194ec52d8c0f, type: 3}
       propertyPath: m_LocalRotation.w
@@ -58652,6 +58656,10 @@ PrefabInstance:
     - target: {fileID: 4236733521188710655, guid: e08d5a579e0c57e4d82d194ec52d8c0f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4413914447842877658, guid: e08d5a579e0c57e4d82d194ec52d8c0f, type: 3}
+      propertyPath: MinDistance
+      value: 1.4762306
       objectReference: {fileID: 0}
     - target: {fileID: 4413914447842877659, guid: e08d5a579e0c57e4d82d194ec52d8c0f, type: 3}
       propertyPath: _soundRadius
@@ -58813,7 +58821,7 @@ PrefabInstance:
       objectReference: {fileID: 593398837}
     - target: {fileID: 7858300990111908797, guid: 46b0968e285d15d4fa64c388b8cff600, type: 3}
       propertyPath: _threshold
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7858300990111908797, guid: 46b0968e285d15d4fa64c388b8cff600, type: 3}
       propertyPath: otherRobot

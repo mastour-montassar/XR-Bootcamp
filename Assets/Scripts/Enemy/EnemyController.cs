@@ -10,11 +10,12 @@ public class EnemyController : MonoBehaviour
         Patrol = 0,
         Investigate = 1,
         ReportBack = 2,          
-        InvestigatingTogether = 3 
+        InvestigatingTogether = 3 ,
+        DoNothing = 4
     }
 
     [SerializeField] private NavMeshAgent _agent;
-    [SerializeField] private float _threshold = 0.5f;
+    [SerializeField] private float _threshold = 2f;
     [SerializeField] private float _waitTime = 2f;
     [SerializeField] private PatrolRoute _patrolRoute;
     [SerializeField] private FieldOfView _fov;
@@ -28,11 +29,13 @@ public class EnemyController : MonoBehaviour
     private Vector3 _otherRobotPosition;
     private bool _hasReported = false; 
     private float _waitTimer = 0f; 
+    private float _originalSpeed;
 
     void Start()
     {
         _currentPoint = _patrolRoute.route[_routeIndex];
         _otherRobotPosition = otherRobot.transform.position;
+        _originalSpeed = _agent.speed;
     }
 
     void Update()
@@ -50,21 +53,35 @@ public class EnemyController : MonoBehaviour
         }
 
 
-        if (_state == EnemyState.Patrol)
+        switch (_state)
         {
-            UpdatePatrol();
+            case EnemyState.Patrol:
+                UpdatePatrol();
+                break;
+            case EnemyState.Investigate:
+                UpdateInvestigate();
+                break;
+            case EnemyState.ReportBack:
+                UpdateReportBack();
+                break;
+            case EnemyState.InvestigatingTogether:
+                UpdateInvestigateTogether();
+                break;
+            case EnemyState.DoNothing:
+                UpdateDoNothing();
+                break;
         }
-        else if(_state == EnemyState.Investigate)
+    }
+
+    private void UpdateDoNothing()
+    {
+        _agent.isStopped = true; 
+        if (Vector3.Distance(transform.position, otherRobot.transform.position) < _threshold)
         {
-            UpdateInvestigate();
-        }
-        else if (_state == EnemyState.ReportBack)
-        {
-            UpdateReportBack();
-        }
-        else if (_state == EnemyState.InvestigatingTogether)
-        {
-            UpdateInvestigateTogether();
+            Debug.Log("DoNothingDoNothingDoNothingDoNothing");
+            _state = EnemyState.InvestigatingTogether;
+            _agent.isStopped = false; 
+            _agent.SetDestination(_investigationPoint); 
         }
     }
 
