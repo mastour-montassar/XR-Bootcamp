@@ -49,7 +49,7 @@ public class FieldOfView : MonoBehaviour
                 
                 Debug.DrawLine(headPos,targetHeadPos, Color.green);
                 
-                visibleObjects.Add(target.transform);
+               // visibleObjects.Add(target.transform);
             }
         }
     }
