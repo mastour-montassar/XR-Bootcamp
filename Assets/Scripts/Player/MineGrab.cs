@@ -9,13 +9,10 @@ public class MineGrab : MonoBehaviour
     [SerializeField] private float _snapSpeed = 40f; 
     [SerializeField] private Rigidbody _rigidbody;
     [SerializeField] private LayerMask _surfaceLayer;
-   
 
-    private Rigidbody _grabbedObject;                 
-    private bool _grabPressed = false;                   
-    private bool _isThrown = false;  
-
-
+    private Rigidbody _grabbedObject;                  // Currently grabbed object
+    private bool _grabPressed = false;                   // Track grab state
+    private bool _isThrown = false;                       // Track if the mine has been thrown
 
     void Start()
     {
@@ -37,7 +34,6 @@ public class MineGrab : MonoBehaviour
         if (_grabPressed)
         {
             _grabPressed = false;
-            
             Debug.Log("Grab Released");
 
             if (!_grabbedObject) return;
@@ -47,7 +43,6 @@ public class MineGrab : MonoBehaviour
         else
         {
             _grabPressed = true;
-            
             Debug.Log("Grab Pressed");
             if (Physics.Raycast(_cameraPosition.position, _cameraPosition.forward, out RaycastHit hit, _grabRange))
             {
@@ -74,7 +69,6 @@ public class MineGrab : MonoBehaviour
         _grabbedObject = null;
     }
 
-   
     private void OnCollisionEnter(Collision collision)
     {
         if (!_isThrown) return;
@@ -83,11 +77,18 @@ public class MineGrab : MonoBehaviour
         {
             StickToSurface(collision.contacts[0].point, collision.contacts[0].normal); 
         }
+
+        // Check if the collided object has a RobotRagdollController
+        RobotRagdollController robotRagdoll = collision.gameObject.GetComponent<RobotRagdollController>();
+        if (robotRagdoll != null)
+        {
+            // Trigger the ragdoll effect
+            robotRagdoll.TriggerRagdoll();
+        }
     }
 
     private void StickToSurface(Vector3 hitPoint, Vector3 hitNormal)
     {
-
         // Place the mine at the collision point and align it to the surface normal
         transform.position = hitPoint;
         transform.rotation = Quaternion.LookRotation(hitNormal);
@@ -95,7 +96,6 @@ public class MineGrab : MonoBehaviour
         _isThrown = false; // Reset throw state after sticking
     }
 
-    // Function to drop the grabbed object (without throwing)
     private void DropGrabbedObject()
     {
         if (!_grabbedObject) return;

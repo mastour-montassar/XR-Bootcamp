@@ -4,34 +4,45 @@ using UnityEngine;
 
 public class Explode : MonoBehaviour
 {
-    public float detectionRange = 5f;       
-    public GameObject explosionEffect;     
+    public float detectionRange = 5f;
+    public GameObject explosionEffect;
 
     void Update()
     {
-        
         Collider[] hits = Physics.OverlapSphere(transform.position, detectionRange);
 
         foreach (Collider hit in hits)
         {
             if (hit.CompareTag("Robot"))
             {
-                Explod(hit.gameObject);
-                break; 
+                ExplodeAndTriggerRagdoll(hit.gameObject);
+                break;
             }
         }
     }
 
-    void Explod(GameObject robot)
+    void ExplodeAndTriggerRagdoll(GameObject robot)
     {
-        // Instantiate explosion effect at mine's position
         GameObject explosionInstance = Instantiate(explosionEffect, transform.position, Quaternion.identity);
-        
-        Destroy(explosionInstance, 1f); // 1f = 1 second
-        Destroy(robot);
+
+        Destroy(explosionInstance, 1f);
         Destroy(gameObject);
 
-        Debug.Log("Robot destroyed and mine exploded.");
+        // Stop patrol and trigger ragdoll
+        EnemyController enemyController = robot.GetComponent<EnemyController>();
+        RobotRagdollController ragdollController = robot.GetComponent<RobotRagdollController>();
+
+        if (enemyController != null)
+        {
+            enemyController.DisablePatrol(); // Stop patrol
+        }
+
+        if (ragdollController != null)
+        {
+            ragdollController.TriggerRagdoll(); // Enable ragdoll physics
+        }
+
+        Debug.Log("Robot patrol stopped and ragdoll triggered.");
     }
 
     private void OnDrawGizmosSelected()

@@ -8,7 +8,8 @@ public class EnemyController : MonoBehaviour
     enum EnemyState
     {
         Patrol = 0,
-        Investigate = 1
+        Investigate = 1,
+        Ragdoll=2
     }
     
     [SerializeField] private NavMeshAgent _agent;
@@ -24,17 +25,17 @@ public class EnemyController : MonoBehaviour
     private bool _forwardsAlongPath = true;
     private Vector3 _investigationPoint;
     private float _waitTimer = 0f;
-    
+    private bool _patrolDisabled = false; 
     // Start is called before the first frame update
     void Start()
     {
         _currentPoint = _patrolRoute.route[_routeIndex];
     }
-
+    
     // Update is called once per frame
     void Update()
     {
-        if (_fov.visibleObjects.Count > 0)
+        if (_fov.visibleObjects.Count > 0 && _patrolDisabled== false)
         {
             InvestigatePoint(_fov.visibleObjects[0].position);
         }
@@ -94,6 +95,12 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+        public void DisablePatrol()
+    {
+        _patrolDisabled = true;
+        _agent.enabled = false; // Disables the NavMeshAgent to stop movement
+        _state = EnemyState.Ragdoll; // Set state to ragdoll
+    }
     private void NextPatrolPoint()
     {
         if (_forwardsAlongPath)
