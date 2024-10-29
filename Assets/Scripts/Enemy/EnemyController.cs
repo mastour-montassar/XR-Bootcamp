@@ -16,7 +16,6 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private float _threshold = 0.5f;
     [SerializeField] private float _waitTime = 2f;
     [SerializeField] private PatrolRoute _patrolRoute;
-    [SerializeField] private FieldOfView _fov;
     [SerializeField] private EnemyState _state = EnemyState.Patrol;
     [SerializeField] private float explosionForce = 700f; // Force applied to each part
     [SerializeField] private float explosionRadius = 5f;  // Radius of the explosion effect
@@ -50,10 +49,6 @@ public class EnemyController : MonoBehaviour
     void Update()
     {
         
-        if (_fov.visibleObjects.Count > 0 && _patrolDisabled== false)
-        {
-            InvestigatePoint(_fov.visibleObjects[0].position);
-        }
         
         if (_state == EnemyState.Patrol)
         {
