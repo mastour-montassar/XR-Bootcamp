@@ -26,9 +26,31 @@ public class Explode : MonoBehaviour
     {
         // Instantiate explosion effect at mine's position
         GameObject explosionInstance = Instantiate(explosionEffect, transform.position, Quaternion.identity);
-        
         Destroy(explosionInstance, 1f); // 1f = 1 second
-        Destroy(robot);
+        
+        EnemyController robotExplode = robot.GetComponent<EnemyController>();
+        /*
+        foreach (Transform part in robot.transform)
+        {
+            part.parent = null;
+            Joint joint = part.GetComponent<Joint>();
+            if (joint != null)
+            {
+                Destroy(joint);
+            }
+            Rigidbody rb = part.GetComponent<Rigidbody>();
+            if (rb == null)
+            {
+                rb = part.gameObject.AddComponent<Rigidbody>();
+            }
+        }*/
+        if (robotExplode != null)
+        {
+            robotExplode.TriggerExplosion();
+        }
+
+ 
+
         Destroy(gameObject);
 
         Debug.Log("Robot destroyed and mine exploded.");

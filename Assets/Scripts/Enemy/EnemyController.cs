@@ -8,7 +8,8 @@ public class EnemyController : MonoBehaviour
     enum EnemyState
     {
         Patrol = 0,
-        Investigate = 1
+        Investigate ,
+        OFF=2
     }
     
     [SerializeField] private NavMeshAgent _agent;
@@ -17,6 +18,11 @@ public class EnemyController : MonoBehaviour
     [SerializeField] private PatrolRoute _patrolRoute;
     [SerializeField] private FieldOfView _fov;
     [SerializeField] private EnemyState _state = EnemyState.Patrol;
+    [SerializeField] private float explosionForce = 700f; // Force applied to each part
+    [SerializeField] private float explosionRadius = 5f;  // Radius of the explosion effect
+    [SerializeField] private Transform explosionPoint;    // Point from where the explosion originates
+    
+    
 
     private bool _moving = false;
     private Transform _currentPoint;
@@ -24,17 +30,27 @@ public class EnemyController : MonoBehaviour
     private bool _forwardsAlongPath = true;
     private Vector3 _investigationPoint;
     private float _waitTimer = 0f;
+    private bool _patrolDisabled = false; 
+    private Rigidbody[] partRigidbodies;
     
     // Start is called before the first frame update
     void Start()
     {
         _currentPoint = _patrolRoute.route[_routeIndex];
+        partRigidbodies = GetComponentsInChildren<Rigidbody>();
+
+        foreach (Rigidbody rb in partRigidbodies)
+        {
+            rb.useGravity = false;
+            rb.isKinematic = true; // Disable physics until explosion
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (_fov.visibleObjects.Count > 0)
+        
+        if (_fov.visibleObjects.Count > 0 && _patrolDisabled== false)
         {
             InvestigatePoint(_fov.visibleObjects[0].position);
         }
@@ -48,7 +64,24 @@ public class EnemyController : MonoBehaviour
             UpdateInvestigate();
         }
     }
+    public void TriggerExplosion()
+    {
+        // Enable physics on each part to simulate explosion
+        foreach (Rigidbody rb in partRigidbodies)
+        {
+            rb.isKinematic = false;
+            rb.useGravity = true;
 
+            // Apply an explosion force to each part
+            rb.AddExplosionForce(explosionForce, explosionPoint.position, explosionRadius);
+        }
+        _patrolDisabled = true;
+        _agent.enabled = false; // Disables the NavMeshAgent to stop movement
+        _state = EnemyState.OFF; // Set state to ragdoll
+
+        Debug.Log("Robot exploded into parts!");
+    }
+    
     public void InvestigatePoint(Vector3 investigatePoint)
     {
         //Debug.Log("Investigate Point Triggered");
@@ -56,6 +89,8 @@ public class EnemyController : MonoBehaviour
         _investigationPoint = investigatePoint;
         _agent.SetDestination(_investigationPoint);
     }
+    
+
 
     private void UpdateInvestigate()
     {
