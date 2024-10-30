@@ -6,6 +6,7 @@ TagManager:
   tags:
   - CinemachineTarget
   - Grabbable
+  - KeyCard
   layers:
   - Default
   - TransparentFX
@@ -14,10 +15,10 @@ TagManager:
   - Water
   - UI
   - Obstacles
-  - 
-  - 
-  - 
-  - 
+  - Minimap
+  - Player
+  - Grab
+  - Hand
   - 
   - 
   - 
