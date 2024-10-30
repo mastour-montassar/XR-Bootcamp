@@ -8,13 +8,11 @@ public class Grab : MonoBehaviour
     [SerializeField] private Transform _holdPosition;
     [SerializeField] private float _grabRange = 2f;
     [SerializeField] private float _snapSpeed = 40f;
-    [SerializeField] private GameObject _cardPosition; 
-    [SerializeField] private GameObject _cardReader; 
-    [SerializeField] private GameObject _card;
     [SerializeField] private float moveSpeed = 5f;
 
     private Rigidbody _grabbedObject;
     private bool _grabPressed = false;
+    private KeyCard keyy;
 
     // Update is called once per frame
     void FixedUpdate()
@@ -47,6 +45,7 @@ public class Grab : MonoBehaviour
                 if (!hit.transform.gameObject.CompareTag("Grabbable")) return;
 
                 _grabbedObject = hit.transform.GetComponent<Rigidbody>();
+                keyy = hit.transform.GetComponent<KeyCard>();
                 _grabbedObject.transform.parent = _holdPosition;
             }
             
@@ -61,18 +60,18 @@ public class Grab : MonoBehaviour
 
     private void OnThrow()
     {
-        KeyCard key = _card.GetComponent<KeyCard>();
-        CardReader cardReader = _cardReader.GetComponent<CardReader>();
-        if (DoorTrigger.intTriger &&  _grabbedObject!=null && key.accessLevel == cardReader.accessLevel )
+        if (DoorTrigger.intTriger && _grabbedObject != null  )
         {
-            _card.SetActive(false);
-            _cardPosition.SetActive(true); 
-         DoorInteractor.OpenDoor(); 
+            
+            DoorInteractor.done = true;
+            DoorInteractor.currentCard = keyy.accessLevel;
         }
         else
         {
             Debug.Log("Throwing card as usual.");
         }
+
+
     }
 
 
