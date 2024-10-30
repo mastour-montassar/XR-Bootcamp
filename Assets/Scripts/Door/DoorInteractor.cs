@@ -4,5 +4,8 @@ using UnityEngine;
 
 public class DoorInteractor : MonoBehaviour
 {
+    public static void OpenDoor()
+    {
         
+    }
 }

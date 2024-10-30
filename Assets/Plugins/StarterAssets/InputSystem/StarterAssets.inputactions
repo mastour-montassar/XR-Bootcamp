@@ -51,7 +51,7 @@
                     "id": "eaaaced8-2153-4a46-ba33-3a585cc6ca02",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press(behavior=2)"
+                    "interactions": "Press(pressPoint=0.5)"
                 },
                 {
                     "name": "Throw",
@@ -59,7 +59,7 @@
                     "id": "e937c6ed-aecb-4ee7-af36-197155f260a2",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Press(behavior=2)"
+                    "interactions": "Press"
                 }
             ],
             "bindings": [

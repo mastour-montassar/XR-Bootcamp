@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class DoorTrigger : MonoBehaviour
 {
-    [SerializeField] private GameObject door;
+    public static bool intTriger = false; 
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.GetComponent<DoorInteractor>())
         {
-            door.SetActive(false);
+            intTriger = true;
         }
     }
 
@@ -16,7 +16,7 @@ public class DoorTrigger : MonoBehaviour
     {
         if (other.GetComponent<DoorInteractor>())
         {
-            door.SetActive(true);
+            intTriger = false; 
         }
     }
 }
