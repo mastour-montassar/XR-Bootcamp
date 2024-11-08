@@ -43,7 +43,7 @@ public class CanManager : MonoBehaviour
         if (counter==3 && win==false)
         {
             win = true;
-            Debug.Log("All cans are knocked down! You win!");
+           Debug.Log("All cans are knocked down! You win!");
             // Trigger reset or win logic
             ResetGame();
         }
