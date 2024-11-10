@@ -2564,6 +2564,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2090118882}
     - target: {fileID: 1162048578191044816, guid: 4d899a762a0fd0d4f9b7eff7403343e6, type: 3}
+      propertyPath: hazardTag
+      value: Blades
+      objectReference: {fileID: 0}
+    - target: {fileID: 1162048578191044816, guid: 4d899a762a0fd0d4f9b7eff7403343e6, type: 3}
       propertyPath: playerTransform
       value: 
       objectReference: {fileID: 1311700610}
