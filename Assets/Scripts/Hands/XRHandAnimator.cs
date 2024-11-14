@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -17,7 +18,16 @@ namespace Hands
             _controller.activateAction.action.started += Fist;
             _controller.activateAction.action.canceled += FistReleased;
         }
-        
+
+        private void OnDestroy()
+        {
+            _controller.selectAction.action.started -= Point;
+            _controller.selectAction.action.canceled -= PointReleased;
+
+            _controller.activateAction.action.started -= Fist;
+            _controller.activateAction.action.canceled -= FistReleased;
+        }
+
         private void Fist(InputAction.CallbackContext obj)
         {
             _animator.SetBool("Fist", true);
