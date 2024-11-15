@@ -8,6 +8,7 @@ TagManager:
   - Grabbable
   - KeyCard
   - Blades
+  - Flammable
   layers:
   - Default
   - TransparentFX
