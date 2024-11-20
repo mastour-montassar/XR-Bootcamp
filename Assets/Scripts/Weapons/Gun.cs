@@ -6,7 +6,7 @@ namespace Weapons
 {
     public class Gun : MonoBehaviour
     {
-        [SerializeField] private XRGrabInteractable _grabInteractable;
+        [SerializeField] protected XRGrabInteractable _grabInteractable;
         [SerializeField] protected Transform _gunBarrel;
         [SerializeField] protected XRSocketInteractor _ammoSocket;
 

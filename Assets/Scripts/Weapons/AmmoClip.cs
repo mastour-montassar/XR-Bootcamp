@@ -6,6 +6,6 @@ namespace Weapons
     {
         public GameObject bulletObject;
         public float bulletSpeed = 20;
-        public int amount = 3;
+        public int amount = 20;
     }
 }
