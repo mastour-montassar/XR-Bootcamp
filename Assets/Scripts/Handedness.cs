@@ -8,12 +8,14 @@ public enum Handed
 public class Handedness : MonoBehaviour
 {
     public Handed handed;
-    [SerializeField] private GameEventManager _gameManager;
     [SerializeField] private GameObject[] leftHandedObjects;
     [SerializeField] private GameObject[] rightHandedObjects;
+    
+    private GameEventManager _gameManager;
 
-    private void Awake()
+    private void Start()
     {
+        _gameManager = FindObjectOfType<GameEventManager>();
         handed = _gameManager.handedness;
         
         if (handed == Handed.Left)

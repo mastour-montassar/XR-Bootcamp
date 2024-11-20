@@ -42,6 +42,11 @@ public class GameEventManager : MonoBehaviour
     private float _initialSkyboxAtmosphereThickness;
     private Color _initialSkyboxColor;
     private float _initialSkyboxExposure;
+
+    private void Awake()
+    {
+        handedness = (Handed)PlayerPrefs.GetInt("handedness");
+    }
     
     // Start is called before the first frame update
     void Start()
@@ -143,8 +148,15 @@ public class GameEventManager : MonoBehaviour
         _isGoalReached = true;
         
         _successPanel.SetActive(true);
-        
-        DeactivateInput();
+
+        if (gameMode == GameMode.FP)
+        {
+            DeactivateInput();
+        }
+        else
+        {
+            StartCoroutine(GameOverFadeOutSaturation(1f));
+        }
         PlayBGM(_successMusic);
     }
 
@@ -179,6 +191,16 @@ public class GameEventManager : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
+    public void ChangeScene(string sceneName)
+    {
+        SceneManager.LoadScene(sceneName);
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -197,5 +219,21 @@ public class GameEventManager : MonoBehaviour
             }
         }
         _canvasGroup.alpha = _fadeLevel;
+    }
+
+    public void ToggleDominantHand()
+    {
+        if (handedness == Handed.Right)
+        {
+            handedness = Handed.Left;
+        }
+        else
+        {
+            handedness = Handed.Right;
+        }
+        PlayerPrefs.SetInt("handedness", (int)handedness);
+        PlayerPrefs.Save();
+        
+        RestartScene();
     }
 }
