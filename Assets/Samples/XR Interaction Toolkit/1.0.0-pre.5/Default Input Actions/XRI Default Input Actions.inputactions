@@ -162,6 +162,14 @@
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
+                },
+                {
+                    "name": "shipControl",
+                    "type": "Button",
+                    "id": "92051b5f-a72a-4655-80e5-012908c00c30",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
                 }
             ],
             "bindings": [
@@ -505,6 +513,17 @@
                     "action": "OpenMenu",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "cd6bfe20-2cab-4493-bb9f-33357cc8d9b2",
+                    "path": "<XRController>{LeftHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "shipControl",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
@@ -620,6 +639,14 @@
                     "name": "OpenMenu",
                     "type": "Button",
                     "id": "7631afe5-72b8-44a0-bccb-b3af39b48fae",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                },
+                {
+                    "name": "shipcontrol",
+                    "type": "Button",
+                    "id": "95af5d34-c82c-4a08-b8eb-36ed6a807a14",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": ""
@@ -953,6 +980,17 @@
                     "processors": "",
                     "groups": "Generic XR Controller",
                     "action": "OpenMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dcd44b93-300a-4dff-887c-7c397d78facf",
+                    "path": "<XRController>{RightHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "shipcontrol",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

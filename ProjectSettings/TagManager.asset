@@ -8,6 +8,7 @@ TagManager:
   - Grabbable
   - KeyCard
   - Ammo
+  - Hand
   layers:
   - Default
   - TransparentFX
