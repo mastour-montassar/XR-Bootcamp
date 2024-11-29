@@ -1,87 +1,141 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
 public class GravityManipulation : MonoBehaviour
 {
-    public float pullForce = 10f;   // Strength of the pull force
-    public float pushForce = 10f;   // Strength of the push force
-    public float maxDistance = 10f; // Maximum distance at which forces can be applied
+    // Enum for gravity modes
+    public enum GravityMode { Pull, Push }
 
-    private Collider[] collidersInRange; // To hold colliders of objects in range
+    [SerializeField] private GravityMode mGravityMode = GravityMode.Pull; // Current gravity mode
+    [SerializeField] private float gravityRadius = 5f;   // Radius of effect
+    [SerializeField] private float gravityForce = 10f;   // Strength of gravity force
+    [SerializeField] private float pullSpeed = 20f;      // Speed for pulling objects
+    [SerializeField] private float pushSpeed = 20f;      // Speed for pushing objects
 
-    // Function to be called when the pull device is activated
-    public void OnPullActivated(SelectEnterEventArgs args)
+    private bool isGrabbed = false; // State to track if the object is grabbed
+
+    private XRGrabInteractable grabInteractable; // XRGrabInteractable component
+
+    private void Awake()
     {
-        var interactor = args.interactor;
-        if (interactor == null) return;
+        // Get the XRGrabInteractable component
+        grabInteractable = GetComponent<XRGrabInteractable>();
 
-        Transform handTransform = interactor.transform;
-
-        // Check for the objects in range of the plunger
-        collidersInRange = Physics.OverlapSphere(handTransform.position, maxDistance);
-
-        // Apply the pull force
-        ApplyPullVisual(handTransform);
+        // Subscribe to grab events
+        grabInteractable.selectEntered.AddListener(OnGrab);
+        grabInteractable.selectExited.AddListener(OnRelease);
     }
 
-    // Function to be called when the push device is activated
-    public void OnPushActivated(SelectEnterEventArgs args)
+    private void OnDestroy()
     {
-        var interactor = args.interactor;
-        if (interactor == null) return;
-
-        Transform handTransform = interactor.transform;
-
-        // Check for the objects in range of the plunger
-        collidersInRange = Physics.OverlapSphere(handTransform.position, maxDistance);
-
-        // Apply the push force
-        ApplyPushVisual(handTransform);
+        // Unsubscribe from grab events
+        grabInteractable.selectEntered.RemoveListener(OnGrab);
+        grabInteractable.selectExited.RemoveListener(OnRelease);
     }
 
-    void ApplyPullVisual(Transform handTransform)
+    private void OnGrab(SelectEnterEventArgs args)
     {
-        foreach (var collider in collidersInRange)
+        isGrabbed = true;
+    }
+
+    private void OnRelease(SelectExitEventArgs args)
+    {
+        isGrabbed = false;
+        ResetObjectsGravity();
+    }
+
+    private void FixedUpdate()
+    {
+        // Apply gravity forces only when the object is grabbed
+        if (!isGrabbed) return;
+
+        // Get all colliders within the gravity radius
+        Collider[] colliders = Physics.OverlapSphere(transform.position, gravityRadius);
+
+        foreach (var item in colliders)
         {
-            if (collider.CompareTag("cube")) // Check if the object has the "cube" tag
+            Rigidbody rb = item.GetComponent<Rigidbody>();
+            if (rb == null || rb.gameObject == this.gameObject) continue; // Skip if no Rigidbody or the grabbed object itself
+
+            // Apply force based on the current gravity mode
+            switch (mGravityMode)
             {
-                Rigidbody rb = collider.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    // Calculate the direction to pull the object
-                    Vector3 direction = (handTransform.position - collider.transform.position).normalized;
+                case GravityMode.Pull:
+                    PullObjectToPlunger(rb);
+                    break;
 
-                    // Apply a visual force to simulate pulling
-                    rb.useGravity = false; // Disable gravity
-                    rb.velocity = direction * pullForce; // Apply visual movement towards the hand (without kinematic)
+                case GravityMode.Push:
+                    PushObjectAway(rb);
+                    break;
 
-                    // Optionally, you can add a small drag or dampening effect to smooth out the movement
-                    rb.drag = 2f; // Adjust as necessary to smooth the movement
-                }
+                default:
+                    break;
             }
         }
     }
 
-    void ApplyPushVisual(Transform handTransform)
+    private void PullObjectToPlunger(Rigidbody rb)
     {
-        foreach (var collider in collidersInRange)
+        // Calculate the direction to pull the object towards the plunger
+        Vector3 direction = (transform.position - rb.position).normalized;
+
+        // Apply velocity to pull the object smoothly towards the plunger
+        rb.useGravity = false; // Disable gravity temporarily
+        rb.velocity = direction * pullSpeed;
+
+        // Check if the object is close enough to stop pulling
+        if (Vector3.Distance(transform.position, rb.position) < 0.5f)
         {
-            if (collider.CompareTag("cube")) // Check if the object has the "cube" tag
+            rb.useGravity = true; // Restore gravity
+            rb.velocity = Vector3.zero; // Stop movement
+        }
+    }
+
+    private void PushObjectAway(Rigidbody rb)
+    {
+        // Calculate the direction to push the object away from the plunger
+        Vector3 direction = (rb.position - transform.position).normalized;
+
+        // Apply velocity to push the object smoothly away from the plunger
+        rb.useGravity = false; // Disable gravity temporarily
+        rb.velocity = direction * pushSpeed;
+
+        // Check if the object is moving too far away (finish push)
+        if (Vector3.Distance(transform.position, rb.position) > gravityRadius)
+        {
+            rb.useGravity = true; // Restore gravity once the push action ends
+            rb.velocity = Vector3.zero; // Stop movement
+        }
+    }
+
+    private void ResetObjectsGravity()
+    {
+        // Reset gravity for all objects within range when releasing the plunger
+        Collider[] colliders = Physics.OverlapSphere(transform.position, gravityRadius);
+
+        foreach (var item in colliders)
+        {
+            Rigidbody rb = item.GetComponent<Rigidbody>();
+            if (rb != null)
             {
-                Rigidbody rb = collider.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    // Calculate the direction to push the object
-                    Vector3 direction = (collider.transform.position - handTransform.position).normalized;
-
-                    // Apply a visual force to simulate pushing
-                    rb.useGravity = false; // Disable gravity
-                    rb.velocity = direction * pushForce; // Apply visual movement away from the hand (without kinematic)
-
-                    // Optionally, you can add a small drag or dampening effect to smooth out the movement
-                    rb.drag = 2f; // Adjust as necessary to smooth the movement
-                }
+                rb.useGravity = true; // Re-enable gravity
+                rb.velocity = Vector3.zero; // Stop any movement
+                rb.angularVelocity = Vector3.zero; // Stop any rotation
             }
         }
     }
+
+    public void SetMode(GravityMode mode)
+    {
+        mGravityMode = mode;
+    }
+
+    private void OnDrawGizmos()
+    {
+        // Draw the gravity radius for visualization in the Scene view
+        Gizmos.color = isGrabbed ? Color.green : Color.red;
+        Gizmos.DrawWireSphere(transform.position, gravityRadius);
+    }
 }
