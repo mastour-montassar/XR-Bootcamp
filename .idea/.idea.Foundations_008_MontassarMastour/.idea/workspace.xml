@@ -7,6 +7,9 @@
     <list default="true" id="0368ee8c-f56f-4d32-a6e6-b1846ccef3d4" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Foundations_008_MontassarMastour/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Foundations_008_MontassarMastour/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/New Scene.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/New Scene.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/VR/GunController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/VR/GunController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/VR/TargetController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/VR/TargetController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/Packages/com.unity.probuilder/Settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/Packages/com.unity.probuilder/Settings.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,6 +101,7 @@
       <workItem from="1731012922012" duration="10361000" />
       <workItem from="1731026464759" duration="12378000" />
       <workItem from="1731074640116" duration="7673000" />
+      <workItem from="1732833749104" duration="8229000" />
     </task>
     <servers />
   </component>
