@@ -1,64 +1,93 @@
 using UnityEngine;
 
-namespace Weapons
+public class BlackHoleGrenade : MonoBehaviour
 {
-    public class BlackHoleGrenade : MonoBehaviour
+    [Header("Black Hole Properties")]
+    [SerializeField] private float pullRadius = 5f;         // Radius of the black hole effect
+    [SerializeField] private float pullForce = 10f;         // Force pulling objects toward the grenade
+    [SerializeField] private float pullDuration = 2f;       // Duration of the pulling effect
+    [SerializeField] private float explosionForce = 20f;    // Force of the explosion
+    [SerializeField] private float explosionRadius = 7f;    // Radius of the explosion effect
+    [SerializeField] private LayerMask affectedLayers;      // Layers affected by the black hole
+    [SerializeField] private GameObject grenadeVisuals;     // Reference to the grenade's visuals (e.g., mesh or particles)
+    [SerializeField] private ParticleSystem explosionEffect; // Optional: Explosion effect particle system
+
+    private bool isPulling = true;
+
+    private void Start()
     {
-        public float pullRadius = 10f;  // Radius of the black hole effect
-        public float pullForce = 50f;   // Strength of the pull
-        public float teleportDistance = 20f; // Teleport distance for objects
-        public float explosionDelay = 3f; // Delay before explosion
-        private bool exploded = false;
+        // Start pulling objects
+        Invoke(nameof(PrepareExplosion), pullDuration); // Prepare explosion after pulling ends
+    }
 
-        void Start()
+    private void FixedUpdate()
+    {
+        if (!isPulling) return;
+
+        // Detect objects within the pull radius
+        Collider[] objectsInRange = Physics.OverlapSphere(transform.position, pullRadius, affectedLayers);
+
+        foreach (var obj in objectsInRange)
         {
-            Destroy(gameObject, explosionDelay);  // Destroy after delay
+            // Ensure the object has a Rigidbody
+            Rigidbody rb = obj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                // Pull objects toward the grenade
+                Vector3 pullDirection = (transform.position - rb.position).normalized;
+                rb.AddForce(pullDirection * pullForce * Time.fixedDeltaTime, ForceMode.Acceleration);
+            }
+        }
+    }
+
+    private void PrepareExplosion()
+    {
+        isPulling = false; // Stop pulling objects
+
+        // Hide the grenade visuals
+        if (grenadeVisuals != null)
+        {
+            grenadeVisuals.SetActive(false);
         }
 
-        void Update()
+        // Optional: Play explosion particle effect
+        if (explosionEffect != null)
         {
-            if (!exploded)
+            explosionEffect.Play();
+        }
+
+        // Delay to apply the explosive force to give time for the grenade disappearance effect
+        Invoke(nameof(TriggerExplosion), 0.5f); // Add a small delay (e.g., 0.5 seconds)
+    }
+
+    private void TriggerExplosion()
+    {
+        // Detect objects within the explosion radius
+        Collider[] objectsInExplosionRange = Physics.OverlapSphere(transform.position, explosionRadius, affectedLayers);
+
+        foreach (var obj in objectsInExplosionRange)
+        {
+            // Ensure the object has a Rigidbody
+            Rigidbody rb = obj.GetComponent<Rigidbody>();
+            if (rb != null)
             {
-                // Pull objects towards the grenade
-                Collider[] collidersInRange = Physics.OverlapSphere(transform.position, pullRadius);
-                foreach (var collider in collidersInRange)
-                {
-                    Rigidbody rb = collider.GetComponent<Rigidbody>();
-                    if (rb != null)
-                    {
-                        // Pull force towards the grenade center
-                        Vector3 direction = (transform.position - collider.transform.position).normalized;
-                        rb.AddForce(direction * pullForce * Time.deltaTime);
-                    }
-                }
+                // Apply an outward explosion force
+                rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, 1f, ForceMode.Impulse);
             }
         }
 
-        void Explode()
-        {
-            // Teleport objects that are within the black hole's range
-            Collider[] collidersInRange = Physics.OverlapSphere(transform.position, pullRadius);
-            foreach (var collider in collidersInRange)
-            {
-                Rigidbody rb = collider.GetComponent<Rigidbody>();
-                if (rb != null)
-                {
-                    Vector3 newLocation = transform.position + (transform.position - collider.transform.position).normalized * teleportDistance;
-                    rb.position = newLocation;
-                    rb.velocity = Vector3.zero;  // Stop any further movement
-                }
-            }
+        // Destroy the grenade after the explosion
+        Destroy(gameObject, 0.1f);
+    }
 
-            exploded = true;
-            Destroy(gameObject);  // Destroy grenade after explosion
-        }
+    private void OnDrawGizmosSelected()
+    {
+        // Visualize pull radius
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, pullRadius);
 
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (!exploded)
-            {
-                Explode();  // Trigger the explosion on collision
-            }
-        }
+        // Visualize explosion radius
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, explosionRadius);
     }
 }

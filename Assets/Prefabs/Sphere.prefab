@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1310208976088225857}
   - component: {fileID: 1310208976088225859}
   - component: {fileID: -6327527771224816880}
+  - component: {fileID: 4622480341483537445}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -128,8 +129,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   pullRadius: 10
   pullForce: 8.6
-  teleportDistance: 2.1
-  explosionDelay: 3
+  pullDuration: 2
+  explosionForce: 20
+  explosionRadius: 2.1
+  affectedLayers:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!64 &-6327527771224816880
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -144,3 +149,16 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!135 &4622480341483537445
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1310208976088225858}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.49999997
+  m_Center: {x: 0, y: 0, z: 0}
