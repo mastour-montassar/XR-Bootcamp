@@ -3,80 +3,126 @@ using UnityEngine;
 public class BlackHoleGrenade : MonoBehaviour
 {
     [Header("Black Hole Properties")]
-    [SerializeField] private float pullRadius = 5f;         // Radius of the black hole effect
-    [SerializeField] private float pullForce = 10f;         // Force pulling objects toward the grenade
-    [SerializeField] private float pullDuration = 2f;       // Duration of the pulling effect
-    [SerializeField] private float explosionForce = 20f;    // Force of the explosion
-    [SerializeField] private float explosionRadius = 7f;    // Radius of the explosion effect
-    [SerializeField] private LayerMask affectedLayers;      // Layers affected by the black hole
-    [SerializeField] private GameObject grenadeVisuals;     // Reference to the grenade's visuals (e.g., mesh or particles)
+    [SerializeField] private float pullRadius = 5f;          // Radius of the black hole effect
+    [SerializeField] private float pullForce = 50000000000f;        // Strong force for pulling
+    [SerializeField] private float teleportOffset = 2f;      // Range for random teleportation
+    [SerializeField] private float stabilityThreshold = 0.1f;// Threshold speed below which the grenade is considered stable
+    [SerializeField] private float pullDuration = 2f;        // Duration of the pulling effect (1 second)
+    [SerializeField] private LayerMask affectedLayers;       // Layers affected by the black hole
+    [SerializeField] private GameObject grenadeVisuals;      // Reference to the grenade's visuals (e.g., mesh or particles)
     [SerializeField] private ParticleSystem explosionEffect; // Optional: Explosion effect particle system
+    [SerializeField] private float stabilityTime = 2f;       // Time after which the grenade will be considered stable if it's not already
 
-    private bool isPulling = true;
+    private bool isPulling = false;   // Pulling state
+    private bool isStable = false;    // Stability state
+    private Rigidbody grenadeRb;      // Rigidbody of the grenade
+    private float stabilityTimer;     // Timer to track how long since the grenade was shot
 
     private void Start()
     {
-        // Start pulling objects
-        Invoke(nameof(PrepareExplosion), pullDuration); // Prepare explosion after pulling ends
+        // Get the grenade's Rigidbody component for stability check
+        grenadeRb = GetComponent<Rigidbody>();
+        stabilityTimer = 0f; // Initialize the timer to 0
+    }
+
+    private void Update()
+    {
+        // Increment the stability timer
+        stabilityTimer += Time.deltaTime;
+
+        // Check if the grenade has become stable (velocity drops below threshold) or after stabilityTime
+        if (!isStable && (grenadeRb.velocity.magnitude < stabilityThreshold || stabilityTimer > stabilityTime))
+        {
+            // Grenade is stable now
+            isStable = true;
+
+            // Make the grenade invisible first when stable
+            if (grenadeVisuals != null)
+            {
+                grenadeVisuals.SetActive(false); // Make the grenade invisible when stable
+            }
+
+            // Immediately start pulling objects (only after stability is achieved)
+            StartPulling();
+        }
+    }
+
+    private void StartPulling()
+    {
+        // Wait for a moment after invisibility to make sure everything is stable, then begin pulling
+        Invoke(nameof(ActivatePulling), 0.1f); // Delay for a brief moment after invisibility to ensure stability
+    }
+
+    private void ActivatePulling()
+    {
+        isPulling = true; // Begin the pulling phase
+
+        // Start pulling for the defined pull duration (1 second)
+        Invoke(nameof(StopPulling), pullDuration);
     }
 
     private void FixedUpdate()
     {
-        if (!isPulling) return;
+        // Ensure pulling only happens if the grenade is stable, invisible, and pulling is active
+        if (!isStable || !isPulling) return;
 
         // Detect objects within the pull radius
         Collider[] objectsInRange = Physics.OverlapSphere(transform.position, pullRadius, affectedLayers);
 
         foreach (var obj in objectsInRange)
         {
-            // Ensure the object has a Rigidbody
+            // Ensure the object has a Rigidbody and is not kinematic
             Rigidbody rb = obj.GetComponent<Rigidbody>();
-            if (rb != null)
+            if (rb != null && !rb.isKinematic)
             {
                 // Pull objects toward the grenade
                 Vector3 pullDirection = (transform.position - rb.position).normalized;
-                rb.AddForce(pullDirection * pullForce * Time.fixedDeltaTime, ForceMode.Acceleration);
+                rb.AddForce(pullDirection * pullForce * Time.fixedDeltaTime, ForceMode.VelocityChange);
             }
         }
     }
 
-    private void PrepareExplosion()
+    private void StopPulling()
     {
-        isPulling = false; // Stop pulling objects
+        // Stop pulling objects
+        isPulling = false;
 
-        // Hide the grenade visuals
-        if (grenadeVisuals != null)
-        {
-            grenadeVisuals.SetActive(false);
-        }
-
-        // Optional: Play explosion particle effect
+        // Optional: Play particle effect (can be used to signal the end of the pull)
         if (explosionEffect != null)
         {
             explosionEffect.Play();
         }
 
-        // Delay to apply the explosive force to give time for the grenade disappearance effect
-        Invoke(nameof(TriggerExplosion), 0.5f); // Add a small delay (e.g., 0.5 seconds)
+        // Trigger teleportation after pulling ends
+        TeleportNearbyObjects();
     }
 
-    private void TriggerExplosion()
+    private void TeleportNearbyObjects()
     {
-        // Detect objects within the explosion radius
-        Collider[] objectsInExplosionRange = Physics.OverlapSphere(transform.position, explosionRadius, affectedLayers);
+        // Detect objects within the teleport radius
+        Collider[] objectsInRange = Physics.OverlapSphere(transform.position, pullRadius, affectedLayers);
 
-        foreach (var obj in objectsInExplosionRange)
+        foreach (var obj in objectsInRange)
         {
-            // Ensure the object has a Rigidbody
+            // Ensure the object has a Rigidbody and is not kinematic
             Rigidbody rb = obj.GetComponent<Rigidbody>();
-            if (rb != null)
+            if (rb != null && !rb.isKinematic)
             {
-                // Apply an outward explosion force
-                rb.AddExplosionForce(explosionForce, transform.position, explosionRadius, 1f, ForceMode.Impulse);
+                // Teleport objects to a nearby random position instead of applying explosion force
+                Vector3 randomOffset = Random.insideUnitSphere * teleportOffset;  // Random offset within the teleport range
+                Vector3 teleportPosition = rb.position + randomOffset;  // New teleport destination
+
+                // Ensure the teleport position is valid (e.g., not underground)
+                teleportPosition.y = Mathf.Max(teleportPosition.y, 0.5f); // Adjust based on environment (e.g., terrain height)
+
+                rb.position = teleportPosition;  // Set the new position
+
+                // Activate useGravity for the object after teleportation
+                rb.useGravity = true;
             }
         }
 
-        // Destroy the grenade after the explosion
+        // Destroy the grenade after the teleportation
         Destroy(gameObject, 0.1f);
     }
 
@@ -85,9 +131,5 @@ public class BlackHoleGrenade : MonoBehaviour
         // Visualize pull radius
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, pullRadius);
-
-        // Visualize explosion radius
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, explosionRadius);
     }
 }
