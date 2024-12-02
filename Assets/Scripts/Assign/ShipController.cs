@@ -6,10 +6,12 @@ public class ShipController : MonoBehaviour
     public GameObject ship;                 // Reference to the spaceship
     public ControlVolume controlVolume;   
     [SerializeField] private Transform handTransform; // Reference to the control volume script
-    [SerializeField] private float movementSpeed = 1.5f;  // Speed multiplier for ship movement
-    [SerializeField] private float rotationSpeed = 0.03f; // Speed multiplier for ship rotation
+    [SerializeField] private float movementSpeed = 0.5f;  // Speed multiplier for ship movement
+    [SerializeField] private float rotationSpeed = 1000f; // Speed multiplier for ship rotation
     [SerializeField] private float movementThreshold = 0.1f; // Threshold for movement detection
-    [SerializeField] private float movementMultiplier = 1000000f;  // Multiplier to extend movement distance (set to 1000)
+    [SerializeField] private float movementMultiplier = 1000f;  // Multiplier for movement magnitude
+    [SerializeField] private float movementSmoothingTime = 1000f; // Damping time for smooth transitions
+    [SerializeField] private float maxMovementDistance = 2.0f; // Maximum movement distance from the starting point
     [SerializeField] private float rotationDamping = 0.1f;  // Damping factor for smooth rotation
 
     public InputActionAsset inputActions;   // Input Action Asset reference
@@ -17,6 +19,8 @@ public class ShipController : MonoBehaviour
     private bool isControllingShip = false; // Track if control is active
     private Vector3 initialHandPosition;  
     private Quaternion initialHandRotation;
+    private Vector3 shipStartPosition; // Ship's original position
+    private Vector3 currentVelocity = Vector3.zero;  // Velocity reference for SmoothDamp
 
     void OnEnable()
     {
@@ -40,8 +44,9 @@ public class ShipController : MonoBehaviour
         if (controlVolume.IsHandInside())
         {
             isControllingShip = true;
-            initialHandPosition = controlVolume.transform.localPosition;
-            initialHandRotation = handTransform.rotation;  
+            initialHandPosition = handTransform.position; // Set initial hand position
+            initialHandRotation = handTransform.rotation;  // Set initial hand rotation
+            shipStartPosition = ship.transform.position;   // Store ship's start position
             Debug.Log("Control initiated");
         }
     }
@@ -60,61 +65,52 @@ public class ShipController : MonoBehaviour
         }
     }
 
-    void ControlShip()  
+    void ControlShip()
+{
+    // Get the current hand position and rotation
+    Vector3 currentHandPosition = handTransform.position;
+    Quaternion currentHandRotation = handTransform.rotation;
+
+    // Calculate the difference in position (hand movement relative to the initial hand position)
+    Vector3 handMovement = currentHandPosition - initialHandPosition;
+
+    // Move the ship based on hand movement, but limit movement distance
+    if (handMovement.magnitude > movementThreshold)
     {
-        // Get the current hand position and rotation
-        Vector3 currentHandPosition = handTransform.position;
-        Quaternion currentHandRotation = handTransform.rotation;
+        // Calculate the target position based on hand movement
+        Vector3 targetPosition = shipStartPosition + handMovement * movementSpeed * movementMultiplier;
 
-        // Calculate the difference in position (hand movement relative to the initial hand position)
-        Vector3 handMovement = currentHandPosition - initialHandPosition;
+        // Clamp the target position to ensure the ship doesn't move beyond the max distance
+        Vector3 clampedTargetPosition = Vector3.ClampMagnitude(targetPosition - shipStartPosition, maxMovementDistance) + shipStartPosition;
 
-        // Move the ship based on hand movement in X (left/right) and Z (forward/backward)
-        if (Mathf.Abs(handMovement.x) > movementThreshold)
-        {
-            ship.transform.Translate(Vector3.right * handMovement.x * movementSpeed * movementMultiplier * Time.deltaTime, Space.Self);
-            initialHandPosition.x = currentHandPosition.x; // Update initial hand position after movement
-        }
-
-        if (Mathf.Abs(handMovement.z) > movementThreshold)
-        {
-            ship.transform.Translate(Vector3.forward * handMovement.z * movementSpeed * movementMultiplier * Time.deltaTime, Space.Self);
-            initialHandPosition.z = currentHandPosition.z; // Update initial hand position after movement
-        }
-
-        // Move the ship vertically if needed (handMovement.y), but you can omit this if unnecessary
-        if (Mathf.Abs(handMovement.y) > movementThreshold)
-        {
-            ship.transform.Translate(Vector3.up * handMovement.y * movementSpeed * movementMultiplier * Time.deltaTime, Space.Self);
-            initialHandPosition.y = currentHandPosition.y; // Update initial hand position after movement
-        }
-
-        // Calculate rotation based on hand rotation (simplified to yaw for left/right rotation)
-        Quaternion handRotationDelta = currentHandRotation * Quaternion.Inverse(initialHandRotation);
-        Vector3 rotationEulerAngles = handRotationDelta.eulerAngles;
-
-        // Apply yaw rotation based on hand movement
-        if (Mathf.Abs(rotationEulerAngles.y) > movementThreshold)
-        {
-            // Smoothing the rotation by interpolating (Lerp) towards the target rotation
-            Quaternion targetRotation = Quaternion.Euler(0, rotationEulerAngles.y, 0);
-            ship.transform.rotation = Quaternion.Slerp(ship.transform.rotation, targetRotation, rotationDamping * Time.deltaTime);
-        }
-
-        // Apply pitch rotation based on hand movement (optional)
-        if (Mathf.Abs(rotationEulerAngles.x) > movementThreshold)
-        {
-            // Smooth pitch rotation (up/down) as well
-            Quaternion targetPitchRotation = Quaternion.Euler(rotationEulerAngles.x, 0, 0);
-            ship.transform.rotation = Quaternion.Slerp(ship.transform.rotation, targetPitchRotation, rotationDamping * Time.deltaTime);
-        }
-
-        // Apply roll rotation (optional)
-        if (Mathf.Abs(rotationEulerAngles.z) > movementThreshold)
-        {
-            // Smooth roll rotation (twist) as well
-            Quaternion targetRollRotation = Quaternion.Euler(0, 0, rotationEulerAngles.z);
-            ship.transform.rotation = Quaternion.Slerp(ship.transform.rotation, targetRollRotation, rotationDamping * Time.deltaTime);
-        }
+        // Use SmoothDamp to move the ship smoothly towards the clamped target position
+        ship.transform.position = Vector3.SmoothDamp(ship.transform.position, clampedTargetPosition, ref currentVelocity, movementSmoothingTime);
     }
+
+    // Rotation logic for yaw, pitch, and roll
+    Quaternion handRotationDelta = currentHandRotation * Quaternion.Inverse(initialHandRotation);
+    Vector3 rotationEulerAngles = handRotationDelta.eulerAngles;
+
+    // Apply yaw rotation
+    if (Mathf.Abs(rotationEulerAngles.y) > movementThreshold)
+    {
+        Quaternion targetRotation = Quaternion.Euler(0, rotationEulerAngles.y, 0);
+        ship.transform.rotation = Quaternion.Slerp(ship.transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+    }
+
+    // Apply pitch rotation (up/down)
+    if (Mathf.Abs(rotationEulerAngles.x) > movementThreshold)
+    {
+        Quaternion targetPitchRotation = Quaternion.Euler(rotationEulerAngles.x, ship.transform.rotation.eulerAngles.y, ship.transform.rotation.eulerAngles.z);
+        ship.transform.rotation = Quaternion.Slerp(ship.transform.rotation, targetPitchRotation, rotationSpeed * Time.deltaTime);
+    }
+
+    // Apply roll rotation
+    if (Mathf.Abs(rotationEulerAngles.z) > movementThreshold)
+    {
+        Quaternion targetRollRotation = Quaternion.Euler(ship.transform.rotation.eulerAngles.x, ship.transform.rotation.eulerAngles.y, rotationEulerAngles.z);
+        ship.transform.rotation = Quaternion.Slerp(ship.transform.rotation, targetRollRotation, rotationSpeed * Time.deltaTime);
+    }
+}
+
 }
