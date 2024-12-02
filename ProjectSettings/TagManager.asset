@@ -9,6 +9,8 @@ TagManager:
   - KeyCard
   - Ammo
   - cube
+  - PullObject
+  - PushObject
   layers:
   - Default
   - TransparentFX

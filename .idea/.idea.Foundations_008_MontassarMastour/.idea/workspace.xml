@@ -6,6 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="de41bbcd-960a-46b0-ba6f-9754e46c3504" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.Foundations_008_MontassarMastour/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.Foundations_008_MontassarMastour/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/VR_Level.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/VR_Level.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scripts/GravityManipulation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scripts/GravityManipulation.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/Packages/com.unity.probuilder/Settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/Packages/com.unity.probuilder/Settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/EditorUserSettings.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -86,6 +91,8 @@
       <option name="presentableId" value="Default" />
       <updated>1732028624444</updated>
       <workItem from="1732028626355" duration="12449000" />
+      <workItem from="1733093822173" duration="749000" />
+      <workItem from="1733110822358" duration="19097000" />
     </task>
     <servers />
   </component>

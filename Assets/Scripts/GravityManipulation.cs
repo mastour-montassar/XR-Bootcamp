@@ -5,32 +5,33 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class GravityManipulation : MonoBehaviour
 {
-    // Enum for gravity modes
     public enum GravityMode { Pull, Push }
 
-    [SerializeField] private GravityMode mGravityMode = GravityMode.Pull; // Current gravity mode
-    [SerializeField] private float gravityRadius = 5f;   // Radius of effect
-    [SerializeField] private float gravityForce = 10f;   // Strength of gravity force
-    [SerializeField] private float pullSpeed = 20f;      // Speed for pulling objects
-    [SerializeField] private float pushSpeed = 20f;      // Speed for pushing objects
+    [SerializeField] private GravityMode mGravityMode = GravityMode.Pull;
+    [SerializeField] private float gravityRadius = 5f;
+    [SerializeField] private float gravityForce = 10f;
+    [SerializeField] private float pullSpeed = 20f;
+    [SerializeField] private float pushSpeed = 20f;
+    [SerializeField] private float moveSpeed = 10f;
 
-    private bool isGrabbed = false; // State to track if the object is grabbed
-
-    private XRGrabInteractable grabInteractable; // XRGrabInteractable component
+    private bool isGrabbed = false;
+    private bool ispush = false;
+    private bool ispull = false;
+    private XRGrabInteractable grabInteractable;
+    private static float nb =0;
+    
+    private List<Rigidbody> controlledObjects = new List<Rigidbody>(); // List to track controlled objects
+    private Vector3 controllerDirection;
 
     private void Awake()
     {
-        // Get the XRGrabInteractable component
         grabInteractable = GetComponent<XRGrabInteractable>();
-
-        // Subscribe to grab events
         grabInteractable.selectEntered.AddListener(OnGrab);
         grabInteractable.selectExited.AddListener(OnRelease);
     }
 
     private void OnDestroy()
     {
-        // Unsubscribe from grab events
         grabInteractable.selectEntered.RemoveListener(OnGrab);
         grabInteractable.selectExited.RemoveListener(OnRelease);
     }
@@ -38,93 +39,120 @@ public class GravityManipulation : MonoBehaviour
     private void OnGrab(SelectEnterEventArgs args)
     {
         isGrabbed = true;
+        controllerDirection = args.interactor.transform.forward;
+        nb++;
     }
 
     private void OnRelease(SelectExitEventArgs args)
     {
+        nb--;
+        ispull = false;
+        ispush = false;
         isGrabbed = false;
-        ResetObjectsGravity();
+        ResetObjectsGravity(); // Activate gravity for controlled objects
     }
 
     private void FixedUpdate()
     {
-        // Apply gravity forces only when the object is grabbed
         if (!isGrabbed) return;
 
-        // Get all colliders within the gravity radius
         Collider[] colliders = Physics.OverlapSphere(transform.position, gravityRadius);
 
         foreach (var item in colliders)
         {
-            Rigidbody rb = item.GetComponent<Rigidbody>();
-            if (rb == null || rb.gameObject == this.gameObject) continue; // Skip if no Rigidbody or the grabbed object itself
-
-            // Apply force based on the current gravity mode
-            switch (mGravityMode)
+            // Check if the object has the tag "Cube"
+            if (item.CompareTag("cube"))
             {
-                case GravityMode.Pull:
+                Rigidbody rb = item.GetComponent<Rigidbody>();
+                if (rb == null || rb.gameObject == this.gameObject) continue;
+
+                if (!controlledObjects.Contains(rb))
+                {
+                    controlledObjects.Add(rb); // Add object to controlled list
+                }
+
+                // Set gravity mode based on object tag
+                if (item.CompareTag("PullObject"))
+                {
+                    mGravityMode = GravityMode.Pull;
+                    ispull = true;
+                }
+                else if (item.CompareTag("PushObject"))
+                {
+                    mGravityMode = GravityMode.Push;
+                    ispush = true;
+                }
+
+                // Apply the pull or push effect and move with controller
+                if (nb==2)
+                {
                     PullObjectToPlunger(rb);
-                    break;
-
-                case GravityMode.Push:
-                    PushObjectAway(rb);
-                    break;
-
-                default:
-                    break;
+                    MoveObjectWithController(rb);
+                }
+                else
+                {
+                    switch (mGravityMode)
+                    {
+                        case GravityMode.Pull:
+                            PullObjectToPlunger(rb);
+                            break;
+                        case GravityMode.Push:
+                            if (!ispull)
+                            {
+                                PushObjectAway(rb);
+                            }
+                            break;
+                    }
+                }
+                // Allow the object to move with the controller
+               
             }
         }
     }
 
     private void PullObjectToPlunger(Rigidbody rb)
     {
-        // Calculate the direction to pull the object towards the plunger
         Vector3 direction = (transform.position - rb.position).normalized;
-
-        // Apply velocity to pull the object smoothly towards the plunger
-        rb.useGravity = false; // Disable gravity temporarily
+        rb.useGravity = false;
         rb.velocity = direction * pullSpeed;
 
-        // Check if the object is close enough to stop pulling
         if (Vector3.Distance(transform.position, rb.position) < 0.5f)
         {
-            rb.useGravity = true; // Restore gravity
-            rb.velocity = Vector3.zero; // Stop movement
+            rb.useGravity = true;
+            rb.velocity = Vector3.zero;
         }
     }
 
     private void PushObjectAway(Rigidbody rb)
     {
-        // Calculate the direction to push the object away from the plunger
         Vector3 direction = (rb.position - transform.position).normalized;
-
-        // Apply velocity to push the object smoothly away from the plunger
-        rb.useGravity = false; // Disable gravity temporarily
+        rb.useGravity = false;
         rb.velocity = direction * pushSpeed;
 
-        // Check if the object is moving too far away (finish push)
         if (Vector3.Distance(transform.position, rb.position) > gravityRadius)
         {
-            rb.useGravity = true; // Restore gravity once the push action ends
-            rb.velocity = Vector3.zero; // Stop movement
+            rb.useGravity = true;
+            rb.velocity = Vector3.zero;
         }
+    }
+
+    private void MoveObjectWithController(Rigidbody rb)
+    {
+        controllerDirection = grabInteractable.selectingInteractor.transform.forward;
+        Vector3 newPosition = rb.position + controllerDirection * moveSpeed * Time.fixedDeltaTime;
+        rb.MovePosition(newPosition);
     }
 
     private void ResetObjectsGravity()
     {
-        // Reset gravity for all objects within range when releasing the plunger
-        Collider[] colliders = Physics.OverlapSphere(transform.position, gravityRadius);
-
-        foreach (var item in colliders)
+        foreach (var rb in controlledObjects)
         {
-            Rigidbody rb = item.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.useGravity = true; // Re-enable gravity
-                rb.velocity = Vector3.zero; // Stop any movement
-                rb.angularVelocity = Vector3.zero; // Stop any rotation
+                rb.useGravity = true; // Restore gravity
             }
         }
+        controlledObjects.Clear(); // Clear the list after releasing
     }
 
     public void SetMode(GravityMode mode)
@@ -134,8 +162,7 @@ public class GravityManipulation : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        // Draw the gravity radius for visualization in the Scene view
         Gizmos.color = isGrabbed ? Color.green : Color.red;
         Gizmos.DrawWireSphere(transform.position, gravityRadius);
-    }
+    }
 }
