@@ -28,9 +28,9 @@ public class SoundEmitter : MonoBehaviour
             {
                 if (col.TryGetComponent(out EnemyController enemyController))
                 {
-                    if (enemyController != null && enemyController.CanReactToSound()) // Check if the enemy can react
+                    if (enemyController != null && enemyController.CanReactToSound())
                     {
-                        enemyController.InvestigatePoint(transform.position);
+                        enemyController.ReportToOtherRobotAndInvestigate(transform.position);
                     }
                 }
             }

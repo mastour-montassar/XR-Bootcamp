@@ -126,6 +126,13 @@ public class EnemyController : MonoBehaviour
         }
     }
 
+    public void ReportToOtherRobotAndInvestigate(Vector3 investigatePoint)
+    {
+        _state = EnemyState.ReportBack;
+        _investigationPoint = investigatePoint;
+        _agent.SetDestination(otherRobot.transform.position);
+    }
+
     public void InvestigateTogether(Vector3 investigatePoint)
     {
         _state = EnemyState.InvestigatingTogether;
@@ -167,12 +174,19 @@ public class EnemyController : MonoBehaviour
     }
 
     private void ReturnToPatrol()
+{
+    if (_state == EnemyState.SilentPatrol)
+    {
+        _state = EnemyState.SilentPatrol;
+    }
+    else
     {
         _state = EnemyState.Patrol;
-        _waitTimer = 0;
-        _moving = false;
-        _hasReported = false;
     }
+    _waitTimer = 0;
+    _moving = false;
+    _hasReported = false;
+}
 
     private void UpdatePatrol()
     {
