@@ -8,6 +8,7 @@ TagManager:
   - Grabbable
   - KeyCard
   - Ammo
+  - LeftHand
   layers:
   - Default
   - TransparentFX
@@ -22,7 +23,7 @@ TagManager:
   - Hand
   - Teleporter
   - Enemy
-  - 
+  - button
   - 
   - 
   - 
