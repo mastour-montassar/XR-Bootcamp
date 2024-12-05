@@ -9,6 +9,7 @@ TagManager:
   - KeyCard
   - Ammo
   - LeftHand
+  - button
   layers:
   - Default
   - TransparentFX
