@@ -110,7 +110,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isPressed: 0
   minimapCamera: {fileID: 0}
-  Camera: {fileID: 0}
 --- !u!1 &3545762625259016297
 GameObject:
   m_ObjectHideFlags: 0
